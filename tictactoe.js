@@ -24,12 +24,8 @@ const gameBoard = (() => {
         [""],[""],[""],
         [""],[""],[""]
     ];
-    const coordToIndex = (x, y) => {
-        return (x - 1) + (y * 3);
-    }
-    const getMarkerAt = (id) => {
-        return gameArray[id];
-    }
+    const coordToIndex = (x, y) => (x - 1) + (y * 3);
+    const getMarkerAt = (id) => gameArray[id];
     const setMarkerAt = (id, marker) => {
         gameArray[id] = marker;
         return marker;
@@ -39,21 +35,23 @@ const gameBoard = (() => {
 
 const gameData = (() => {
     let currentPlayer;
-    const changePlayer = () => {
-        currentPlayer = (currentPlayer === playerOne) ? playerTwo : playerOne;
-        return currentPlayer;
+    const changePlayer = function(){
+        this.currentPlayer = (this.currentPlayer === playerOne) ? playerTwo : playerOne;
+        return this.currentPlayer;
     };
-    const getCurrentPlayer = () => {
-        return currentPlayer;
-    }
-    return { getCurrentPlayer, changePlayer };
+    return { currentPlayer, changePlayer };
 })();
 
 const Player = (name, marker) => {
-    const move = (marker) => {
-
+    const move = function(cellID, node){
+        // draw marker to screen;
+        node.textContent = gameBoard.setMarkerAt(cellID, this.marker);
+        // check for win or draw;
+        
+        // change player if above is false;
+        gameData.changePlayer();
     }
-    return { name, marker }
+    return { name, marker, move }
 }
 
 const displayContainer = (() => {
@@ -62,10 +60,9 @@ const displayContainer = (() => {
         const gridCell = document.createElement("div");
         gridCell.classList.add("grid-cell");
         gridCell.id = `cell-${i}`;
-        gridCell.addEventListener("mousedown", function(event){
+        gridCell.addEventListener("mousedown", (event) => {
             if (gameBoard.getMarkerAt(i)[0]){ return };
-            event.target.textContent = gameBoard.setMarkerAt(i, gameData.getCurrentPlayer().marker);
-            gameData.changePlayer();
+            gameData.currentPlayer.move.call(gameData.currentPlayer, i, event.target);
         })
         gridBox.appendChild(gridCell);
     };
