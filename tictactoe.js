@@ -1,22 +1,3 @@
-// main goal with the setup is to have as little global code as possible
-// so tuck everything inside a module or a factory
-// rule of thumb - if you only ever need ONE of something (gameBoard, displayController), use a module. if you need multiple (players), create using a factory
-
-
-
-// player factory function
-    // attributes - name, marker, maybe shared function to determine whose turn it is
-    //player 1 object
-    //layer 2 object
-
-//displayContainer object (module?)
-    // methods and info of the game on screen
-    // essentially translating gameBoard to the screen
-    // should this be a child of gameBoard? to use all of gameboard's data immediately?
-    // or the other way around? so the action on screen is controlled by gameboard? 
-            // eg: gameboard(set container = get array)
-
-
 const gameBoard = (() => {
     const gameSize = 3;
     const gameArray = [
@@ -24,13 +5,35 @@ const gameBoard = (() => {
         [""],[""],[""],
         [""],[""],[""]
     ];
-    const coordToIndex = (x, y) => (x - 1) + (y * 3);
+    const indexToCoord = (index) => {
+        return {
+            x: Number(index)%3,
+            y: Math.floor(Number(index)/3)
+        }
+    };
+    const coordToIndex = (x, y) => x + y*3;
     const getMarkerAt = (id) => gameArray[id];
     const setMarkerAt = (id, marker) => {
         gameArray[id] = marker;
         return marker;
     }
-    return { gameArray, getMarkerAt, setMarkerAt };
+    const checkWin = (cell, marker) => {
+        let coord = indexToCoord(cell);
+        let baseX = coordToIndex(0, coord.y);
+        let baseY = coordToIndex(coord.x, 0);
+        const checkHorizontal = (y) => (gameArray[y] === gameArray[y + 1] &&
+                gameArray[y + 1] === gameArray[y + 2]);
+        const checkVertical = (x) => (gameArray[x] === gameArray[x + 3] &&
+            gameArray[x + 3] === gameArray[x + 6]);
+        const checkDiagonal = (mark) => {
+            return (gameArray[0] === mark && gameArray[4] === mark && gameArray[8] === mark ||
+                gameArray[2] === mark && gameArray[4] === mark && gameArray[6] === mark)
+        }
+        if (checkHorizontal(baseX) || checkVertical(baseY) || checkDiagonal(marker)){
+            alert("you win");
+        }
+    }
+    return { gameArray, getMarkerAt, setMarkerAt, checkWin };
 })();
 
 const gameData = (() => {
@@ -44,11 +47,8 @@ const gameData = (() => {
 
 const Player = (name, marker) => {
     const move = function(cellID, node){
-        // draw marker to screen;
         node.textContent = gameBoard.setMarkerAt(cellID, this.marker);
-        // check for win or draw;
-        
-        // change player if above is false;
+        gameBoard.checkWin(cellID, marker)
         gameData.changePlayer();
     }
     return { name, marker, move }
@@ -62,7 +62,7 @@ const displayContainer = (() => {
         gridCell.id = `cell-${i}`;
         gridCell.addEventListener("mousedown", (event) => {
             if (gameBoard.getMarkerAt(i)[0]){ return };
-            gameData.currentPlayer.move.call(gameData.currentPlayer, i, event.target);
+            gameData.currentPlayer.move(i, event.target);
         })
         gridBox.appendChild(gridCell);
     };
