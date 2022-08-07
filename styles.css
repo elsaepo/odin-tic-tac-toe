@@ -1,3 +1,27 @@
-h1 {
-    color: green;
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+#game-container {
+    margin-top: 5vh;
+    width: 800px;
+    border: 2px solid black;
+}
+
+#grid-container {
+    display: grid;
+    grid-template: repeat(3, 100px) / repeat(3, 100px);
+    gap: 16px;
+    border: 2px solid pink;
+}
+
+.grid-cell {
+    border: 2px solid green;
 }
