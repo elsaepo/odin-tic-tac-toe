@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Raleway:wght@100;200;300;400;500;600;700&family=Roboto+Mono:wght@200;400;700&display=swap');
+
+:root {
+    --grid-border: 2px solid rgb(187, 187, 187);
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -7,25 +13,49 @@ body {
     padding: 0;
     display: flex;
     justify-content: center;
+    font-family: Poppins, Arial, sans-serif;
+}
+
+h1 {
+    font-family: "Roboto Mono", monospace;
 }
 
 #game-container {
     margin-top: 5vh;
-    width: 800px;
-    border: 2px solid black;
 }
 
 #grid-container {
     display: grid;
     grid-template: repeat(3, 100px) / repeat(3, 100px);
-    gap: 16px;
-    border: 2px solid pink;
 }
 
 .grid-cell {
-    border: 2px solid green;
+    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 6rem;
+    cursor: pointer;
+}
+
+.o-sizer {
+    font-size: 8rem;
+}
+
+.grid-hover:hover {
+    background-color: rgb(220, 220, 220)
+}
+
+.grid-winner {
+    color: rgb(91, 136, 91);
+    font-size: 10rem;
+    transition: font-size 0.3s ease;
+}
+
+#cell-0, #cell-1, #cell-2, #cell-3, #cell-4, #cell-5 {
+    border-bottom: var(--grid-border);
+}
+
+#cell-0, #cell-1, #cell-3, #cell-4, #cell-6, #cell-7 {
+    border-right: var(--grid-border);
 }
