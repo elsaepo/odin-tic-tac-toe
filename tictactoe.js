@@ -49,6 +49,7 @@ const gameData = (() => {
     let winner;
     const changePlayer = function () {
         this.currentPlayer = (this.currentPlayer === playerOne) ? playerTwo : playerOne;
+        // Set hover to current player's marker
         displayContainer.hoverBoxes.forEach(node => {
             node.textContent = this.currentPlayer.marker;
             this.currentPlayer.marker === "⚬" ? node.classList.add("o-sizer") : node.classList.remove("o-sizer")
@@ -70,14 +71,14 @@ const Player = (name, marker) => {
             gameData.winner = this;
             // Add visual flavour to winning cells, remove hover elements from remaining cells
             winReturn.map(ind => document.querySelector(`#cell-${ind}`).classList.add("grid-winner"));
+            displayContainer.hoverBoxes.forEach(node => {node.textContent = ""});
             displayContainer.gridBox.childNodes.forEach(cell => {
                 if(cell.classList){cell.classList.remove("grid-hover")}
             });
             displayContainer.outputBox.textContent = `${this.name} is the winner!`;
         } else if (gameData.moves === 9) {
             displayContainer.outputBox.textContent = `It's a draw! Though Carl is the real winner :)`;
-        }
-        gameData.changePlayer();
+        } else gameData.changePlayer();
     }
     return { name, marker, move }
 }

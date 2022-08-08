@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Raleway:wght@100;200;300;400;500;600;700&family=Roboto+Mono:wght@200;400;700&display=swap');
 
 :root {
-    --grid-border: 2px solid rgb(187, 187, 187);
+    --grid-border: 4px solid rgb(187, 187, 187);
 }
 
 *, *::before, *::after {
@@ -18,6 +18,11 @@ body {
 
 h1 {
     font-family: "Roboto Mono", monospace;
+    margin-bottom: 0;
+}
+
+p {
+    margin: 0;
 }
 
 #game-container {
@@ -26,7 +31,11 @@ h1 {
 
 #grid-container {
     display: grid;
-    grid-template: repeat(3, 100px) / repeat(3, 100px);
+    width: min(400px, 80vw);
+    height: min(400px, 80vw);
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    margin: 24px auto;
+    /* filter: blur(5px); */
 }
 
 .grid-cell {
@@ -34,13 +43,14 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 6rem;
+    font-size: 9rem;
     cursor: pointer;
     position: relative;
+    overflow: hidden;
 }
 
 .o-sizer {
-    font-size: 8rem;
+    font-size: 12rem;
 }
 
 .grid-hover:hover {
@@ -64,8 +74,8 @@ h1 {
 
 .grid-winner {
     color: rgb(91, 136, 91);
-    font-size: 10rem;
-    transition: font-size 0.3s ease;
+    font-size: 15rem;
+    transition: font-size 0.2s ease;
 }
 
 #cell-0, #cell-1, #cell-2, #cell-3, #cell-4, #cell-5 {
@@ -74,4 +84,57 @@ h1 {
 
 #cell-0, #cell-1, #cell-3, #cell-4, #cell-6, #cell-7 {
     border-right: var(--grid-border);
+}
+
+/* Player name entries */
+#players-container {
+    margin-top: 12px;
+    height: 40px;
+    display: flex;
+}
+
+.player {
+    flex-grow: 1;
+    display: flex;
+}
+
+.player-info {
+    flex-grow: 1;
+}
+
+.player-score {
+    width: 50px;
+    padding-top: 4px;
+    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.player-divider {
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+}
+
+.player-marker {
+    font-size: 0.9rem;
+}
+
+.player-name {
+    line-height: 0.8;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-one-info {
+    text-align: right;
 }
