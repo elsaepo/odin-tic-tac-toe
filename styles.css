@@ -36,6 +36,7 @@ h1 {
     justify-content: center;
     font-size: 6rem;
     cursor: pointer;
+    position: relative;
 }
 
 .o-sizer {
@@ -43,7 +44,22 @@ h1 {
 }
 
 .grid-hover:hover {
-    background-color: rgb(220, 220, 220)
+    background-color: rgb(220, 220, 220);
+}
+
+.grid-hover {
+    z-index: 3;
+}
+
+.grid-over {
+    display: none;
+    position: absolute;
+    pointer-events: none;
+    color: rgb(151, 151, 151);
+}
+
+.grid-cell:hover .grid-over {
+    display: inline-block;
 }
 
 .grid-winner {

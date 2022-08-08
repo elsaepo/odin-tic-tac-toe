@@ -49,6 +49,10 @@ const gameData = (() => {
     let winner;
     const changePlayer = function () {
         this.currentPlayer = (this.currentPlayer === playerOne) ? playerTwo : playerOne;
+        displayContainer.hoverBoxes.forEach(node => {
+            node.textContent = this.currentPlayer.marker;
+            this.currentPlayer.marker === "⚬" ? node.classList.add("o-sizer") : node.classList.remove("o-sizer")
+        })
         return this.currentPlayer;
     };
     return { currentPlayer, changePlayer, moves };
@@ -57,13 +61,18 @@ const gameData = (() => {
 const Player = (name, marker) => {
     const move = function (cellID, node) {
         node.textContent = gameBoard.setMarkerAt(cellID, this.marker);
+        // Makes "o" elements bigger due to available unicode characters
         if (this.marker === "⚬"){ node.classList.add("o-sizer") };
         node.classList.remove("grid-hover");
         gameData.moves++;
         let winReturn = gameBoard.checkWin(cellID, marker);
         if (winReturn) {
             gameData.winner = this;
+            // Add visual flavour to winning cells, remove hover elements from remaining cells
             winReturn.map(ind => document.querySelector(`#cell-${ind}`).classList.add("grid-winner"));
+            displayContainer.gridBox.childNodes.forEach(cell => {
+                if(cell.classList){cell.classList.remove("grid-hover")}
+            });
             displayContainer.outputBox.textContent = `${this.name} is the winner!`;
         } else if (gameData.moves === 9) {
             displayContainer.outputBox.textContent = `It's a draw! Though Carl is the real winner :)`;
@@ -79,6 +88,10 @@ const displayContainer = (() => {
         const gridCell = document.createElement("div");
         gridCell.classList.add("grid-cell");
         gridCell.classList.add("grid-hover");
+        const gridOver = document.createElement("div");
+        gridOver.classList.add("grid-over");
+        gridOver.textContent = "×";
+        gridCell.appendChild(gridOver)
         gridCell.id = `cell-${i}`;
         gridCell.addEventListener("mousedown", (event) => {
             event.preventDefault();
@@ -89,7 +102,8 @@ const displayContainer = (() => {
         gridBox.appendChild(gridCell);
     };
     const outputBox = document.querySelector("#output-container");
-    return { gridBox, outputBox }
+    const hoverBoxes = document.querySelectorAll(".grid-over")
+    return { gridBox, outputBox, hoverBoxes }
 })();
 
 let playerOne = Player("Kindon", "×");
