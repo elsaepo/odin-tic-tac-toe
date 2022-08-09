@@ -1,10 +1,15 @@
 const gameBoard = (() => {
-    const gameSize = 3;
-    const gameArray = [
-        [""], [""], [""],
-        [""], [""], [""],
-        [""], [""], [""]
+    const emptyGameArray = [
+        "", "", "",
+        "", "", "",
+        "", "", ""
     ];
+    let gameArray = [...emptyGameArray];
+    // THIS IS NOT RESETTING so i'm not using it at the moment
+    // it uses a different gameArray than the object? but setMarkerAt uses the right one? probably something to do with scope
+    const resetGameArray = () => {
+        gameArray.forEach(tile => tile = "");
+    }
     const coordToIndex = (x, y) => x + y * 3;
     const indexToCoord = (index) => {
         return {
@@ -32,23 +37,23 @@ const gameBoard = (() => {
             };
         }
         const checkDiagonal = (mark) => {
-            if(gameArray[0] === mark && gameArray[4] === mark && gameArray[8] === mark){
+            if (gameArray[0] === mark && gameArray[4] === mark && gameArray[8] === mark) {
                 return [0, 4, 8];
-            } else if(gameArray[2] === mark && gameArray[4] === mark && gameArray[6] === mark){
+            } else if (gameArray[2] === mark && gameArray[4] === mark && gameArray[6] === mark) {
                 return [2, 4, 6];
             }
         }
         return (checkHorizontal(baseX) || checkVertical(baseY) || checkDiagonal(marker));
     }
-    return { gameArray, getMarkerAt, setMarkerAt, checkWin };
+    return { gameArray, resetGameArray, getMarkerAt, setMarkerAt, checkWin };
 })();
 
 const gameData = (() => {
     let currentPlayer;
     let moves = 0;
-    let winner;
     const changePlayer = function () {
         this.currentPlayer = (this.currentPlayer === playerOne) ? playerTwo : playerOne;
+        displayContainer.highlightBox(this.currentPlayer);
         // Set hover to current player's marker
         displayContainer.hoverBoxes.forEach(node => {
             node.textContent = this.currentPlayer.marker;
@@ -63,21 +68,25 @@ const Player = (name, marker) => {
     const move = function (cellID, node) {
         node.textContent = gameBoard.setMarkerAt(cellID, this.marker);
         // Makes "o" elements bigger due to available unicode characters
-        if (this.marker === "⚬"){ node.classList.add("o-sizer") };
+        if (this.marker === "⚬") { node.classList.add("o-sizer") };
         node.classList.remove("grid-hover");
         gameData.moves++;
         let winReturn = gameBoard.checkWin(cellID, marker);
+        // On Win logic
         if (winReturn) {
             gameData.winner = this;
             // Add visual flavour to winning cells, remove hover elements from remaining cells
             winReturn.map(ind => document.querySelector(`#cell-${ind}`).classList.add("grid-winner"));
-            displayContainer.hoverBoxes.forEach(node => {node.textContent = ""});
+            displayContainer.hoverBoxes.forEach(node => { node.textContent = "" });
             displayContainer.gridBox.childNodes.forEach(cell => {
-                if(cell.classList){cell.classList.remove("grid-hover")}
+                if (cell.classList) { cell.classList.remove("grid-hover") }
             });
-            displayContainer.outputBox.textContent = `${this.name} is the winner!`;
+            displayContainer.addScore(this);
+            displayContainer.nextRoundButton.classList.remove("inactive-button");
+            // WINNER DISPLAY
         } else if (gameData.moves === 9) {
-            displayContainer.outputBox.textContent = `It's a draw! Though Carl is the real winner :)`;
+            displayContainer.nextRoundButton.classList.remove("inactive-button");
+            // DRAW DISPLAY
         } else gameData.changePlayer();
     }
     return { name, marker, move }
@@ -85,28 +94,65 @@ const Player = (name, marker) => {
 
 const displayContainer = (() => {
     const gridBox = document.querySelector("#grid-container");
-    for (let i = 0; i < 9; i++) {
-        const gridCell = document.createElement("div");
-        gridCell.classList.add("grid-cell");
-        gridCell.classList.add("grid-hover");
-        const gridOver = document.createElement("div");
-        gridOver.classList.add("grid-over");
-        gridOver.textContent = "×";
-        gridCell.appendChild(gridOver)
-        gridCell.id = `cell-${i}`;
-        gridCell.addEventListener("mousedown", (event) => {
-            event.preventDefault();
-            if (gameData.winner) { return };
-            if (gameBoard.getMarkerAt(i)[0]) { return };
-            gameData.currentPlayer.move(i, event.target);
-        })
-        gridBox.appendChild(gridCell);
+    let hoverBoxes;
+    const drawGrid = function () {
+        for (let i = 0; i < 9; i++) {
+            const gridCell = document.createElement("div");
+            gridCell.classList.add("grid-cell");
+            gridCell.classList.add("grid-hover");
+            const gridOver = document.createElement("div");
+            gridOver.classList.add("grid-over");
+            gridOver.textContent = playerOne.marker;
+            gridCell.appendChild(gridOver)
+            gridCell.id = `cell-${i}`;
+            gridCell.addEventListener("mousedown", (event) => {
+                event.preventDefault();
+                if (gameData.winner) { return };
+                if (gameBoard.getMarkerAt(i)[0]) { return };
+                gameData.currentPlayer.move(i, event.target);
+            })
+            gridBox.appendChild(gridCell);
+        }
+        this.hoverBoxes = document.querySelectorAll(".grid-over");
     };
+    const resetGrid = function () {
+        while (this.gridBox.lastChild) {
+            this.gridBox.removeChild(this.gridBox.lastChild);
+        }
+        this.drawGrid();
+    }
+    const getNum = (obj) => { return (obj === playerOne) ? "one" : "two"; }
+    const setName = function (player, newName) {
+        const name = document.querySelector(`.player-${getNum(player)}-name`);
+        name.textContent = newName;
+    }
+    const addScore = function (player) {
+        const score = document.querySelector(`.player-${getNum(player)}-score`);
+        score.textContent = Number(score.textContent) + 1;
+    }
+    // This highlights the player whose move it is (the active player)
+    const highlightBox = function (player) {
+        document.querySelectorAll(`.player-one-name, .player-two-name`).forEach(node => node.classList.remove("active-move"));
+        document.querySelector(`.player-${getNum(player)}-name`).classList.add("active-move");
+    }
     const outputBox = document.querySelector("#output-container");
-    const hoverBoxes = document.querySelectorAll(".grid-over")
-    return { gridBox, outputBox, hoverBoxes }
+    let nextRoundButton = document.querySelector("#next-round");
+    nextRoundButton.addEventListener("mousedown", function (event) {
+        event.target.classList.add("inactive-button")
+        displayContainer.resetGrid();
+        // gameBoard.resetGameArray(); <- why doesn't this work?
+        for (let i = 0; i < gameBoard.gameArray.length; i++) {
+            gameBoard.setMarkerAt(i, "");
+        }
+        gameData.winner = "";
+        gameData.changePlayer();
+        gameData.moves = 0;
+    })
+    return { gridBox, drawGrid, resetGrid, outputBox, hoverBoxes, setName, addScore, highlightBox, nextRoundButton }
 })();
 
-let playerOne = Player("Kindon", "×");
-let playerTwo = Player("Carl", "⚬");
-gameData.currentPlayer = playerOne;
+let playerOne = Player("Carl", "×");
+let playerTwo = Player("Kindon", "⚬");
+
+displayContainer.drawGrid();
+gameData.changePlayer();
