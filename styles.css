@@ -113,6 +113,21 @@ p {
     width: 100%;
     z-index: 5;
     overflow: hidden;
+    animation: blur-in;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    animation-duration: 0.3s;
+}
+
+@keyframes blur-in {
+    0% {
+        opacity: 0;
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        filter: blur(0px);
+    }
 }
 
 .hidden {
@@ -160,7 +175,8 @@ p {
     font-family: "Carter One", monospace;
     line-height: 0;
     padding-top: 8px;
-    transition: transform 0.1s ease, background-color 0.1s ease, color 0.1s ease
+    opacity: 1;
+    transition: transform 0.1s ease, background-color 0.1s ease, color 0.1s ease;
 }
 
 #start-game:hover {
