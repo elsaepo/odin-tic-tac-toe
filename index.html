@@ -19,26 +19,47 @@
                 <div class="player-info player-one-info">
                     <div class="player-marker player-one-marker">PLAYER X</div>
                     <div class="player-name player-one-name">
-                        <p>CARLITO</p>
+                        <p>???</p>
                     </div>
                 </div>
                 <div class="player-score player-one-score">0</div>
             </div>
             <div class="player-divider">
                 <p>:</p>
-            </div> 
+            </div>
             <div class="player player-two">
                 <div class="player-score player-two-score">0</div>
                 <div class="player-info player-two-info">
                     <div class="player-marker player-two-marker">PLAYER O</div>
                     <div class="player-name player-two-name">
-                        <p>KINDON</p>
+                        <p>???</p>
                     </div>
                 </div>
             </div>
 
         </div>
         <div id="grid-container">
+            <div id="newgame-container">
+                <div class="new-player new-player-one">
+                    <div class="new-label">
+                        <p>PLAYER X</p>
+                    </div>
+                    <div class="new-name">
+                        <input type="text" name="player-one-name" id="player-one-name" maxlength="12"
+                            placeholder="Enter your name" required>
+                    </div>
+                </div>
+                <div class="new-player new-player-two">
+                    <div class="new-label">
+                        <p>PLAYER O</p>
+                    </div>
+                    <div class="new-name">
+                        <input type="text" name="player-two-name" id="player-two-name" maxlength="12"
+                            placeholder="Enter your name" required>
+                    </div>
+                </div>
+                <button id="start-game">FIGHT!</button>
+            </div>
 
         </div>
         <div id="output-container">

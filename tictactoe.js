@@ -7,9 +7,9 @@ const gameBoard = (() => {
     let gameArray = [...emptyGameArray];
     // THIS IS NOT RESETTING so i'm not using it at the moment
     // it uses a different gameArray than the object? but setMarkerAt uses the right one? probably something to do with scope
-    const resetGameArray = () => {
-        gameArray.forEach(tile => tile = "");
-    }
+    // const resetGameArray = () => {
+    //     gameArray.forEach(tile => tile = "");
+    // }
     const coordToIndex = (x, y) => x + y * 3;
     const indexToCoord = (index) => {
         return {
@@ -45,14 +45,16 @@ const gameBoard = (() => {
         }
         return (checkHorizontal(baseX) || checkVertical(baseY) || checkDiagonal(marker));
     }
-    return { gameArray, resetGameArray, getMarkerAt, setMarkerAt, checkWin };
+    return { gameArray, getMarkerAt, setMarkerAt, checkWin };
 })();
 
 const gameData = (() => {
     let currentPlayer;
     let moves = 0;
-    const changePlayer = function () {
-        this.currentPlayer = (this.currentPlayer === playerOne) ? playerTwo : playerOne;
+    const changePlayer = function (player) {
+        if (player) { this.currentPlayer = player } else {
+            this.currentPlayer = (this.currentPlayer === playerOne) ? playerTwo : playerOne;
+        }
         displayContainer.highlightBox(this.currentPlayer);
         // Set hover to current player's marker
         displayContainer.hoverBoxes.forEach(node => {
@@ -64,7 +66,7 @@ const gameData = (() => {
     return { currentPlayer, changePlayer, moves };
 })();
 
-const Player = (name, marker) => {
+const Player = (name, marker, controller) => {
     const move = function (cellID, node) {
         node.textContent = gameBoard.setMarkerAt(cellID, this.marker);
         // Makes "o" elements bigger due to available unicode characters
@@ -88,6 +90,7 @@ const Player = (name, marker) => {
             displayContainer.nextRoundButton.classList.remove("inactive-button");
             // DRAW DISPLAY
         } else gameData.changePlayer();
+
     }
     return { name, marker, move }
 }
@@ -116,27 +119,49 @@ const displayContainer = (() => {
         this.hoverBoxes = document.querySelectorAll(".grid-over");
     };
     const resetGrid = function () {
-        while (this.gridBox.lastChild) {
+        while (this.gridBox.children.length > 1) {
             this.gridBox.removeChild(this.gridBox.lastChild);
         }
         this.drawGrid();
     }
-    const getNum = (obj) => { return (obj === playerOne) ? "one" : "two"; }
-    const setName = function (player, newName) {
-        const name = document.querySelector(`.player-${getNum(player)}-name`);
-        name.textContent = newName;
+    const newGameBox = {
+        startButton: document.querySelector("#start-game"),
+        playerOne: document.querySelector(".new-player-one"),
+        playerTwo: document.querySelector(".new-player-two"),
+        newContainer: document.querySelector("#newgame-container")
+    }
+    newGameBox.startButton.addEventListener("mousedown", function (event) {
+        let p1Name = document.querySelector("#player-one-name").value || "Anonymous";
+        let p2Name = document.querySelector("#player-two-name").value || "Anonymous";
+        playerOne = Player(p1Name, "×", "human");
+        playerTwo = Player(p2Name, "⚬", "human");
+        drawName(playerOne);
+        drawName(playerTwo);
+        document.querySelector(".player-one-score").textContent = "0";
+        document.querySelector(".player-two-score").textContent = "0";
+        newGameBox.startButton.classList.add("zoom");
+        newGameBox.playerOne.classList.add("hide-up");
+        newGameBox.playerTwo.classList.add("hide-down");
+        setTimeout(function () {
+            newGameBox.newContainer.style.display = "none";
+        }, 500)
+        gameData.changePlayer(playerOne);
+    })
+    const getPlayerNum = (obj) => { return (obj === playerOne) ? "one" : "two"; }
+    const drawName = function (player) {
+        const name = document.querySelector(`.player-${getPlayerNum(player)}-name`);
+        name.textContent = player.name;
     }
     const addScore = function (player) {
-        const score = document.querySelector(`.player-${getNum(player)}-score`);
+        const score = document.querySelector(`.player-${getPlayerNum(player)}-score`);
         score.textContent = Number(score.textContent) + 1;
     }
     // This highlights the player whose move it is (the active player)
     const highlightBox = function (player) {
         document.querySelectorAll(`.player-one-name, .player-two-name`).forEach(node => node.classList.remove("active-move"));
-        document.querySelector(`.player-${getNum(player)}-name`).classList.add("active-move");
+        document.querySelector(`.player-${getPlayerNum(player)}-name`).classList.add("active-move");
     }
-    const outputBox = document.querySelector("#output-container");
-    let nextRoundButton = document.querySelector("#next-round");
+    const nextRoundButton = document.querySelector("#next-round");
     nextRoundButton.addEventListener("mousedown", function (event) {
         event.target.classList.add("inactive-button")
         displayContainer.resetGrid();
@@ -145,14 +170,27 @@ const displayContainer = (() => {
             gameBoard.setMarkerAt(i, "");
         }
         gameData.winner = "";
-        gameData.changePlayer();
         gameData.moves = 0;
+        gameData.changePlayer();
     })
-    return { gridBox, drawGrid, resetGrid, outputBox, hoverBoxes, setName, addScore, highlightBox, nextRoundButton }
+    const restartButton = document.querySelector("#restart-game");
+    restartButton.addEventListener("mousedown", function (event) {
+        displayContainer.resetGrid();
+        for (let i = 0; i < gameBoard.gameArray.length; i++) {
+            gameBoard.setMarkerAt(i, "");
+        }
+        gameData.winner = "";
+        gameData.moves = 0;
+        newGameBox.newContainer.style.display = "flex";
+        newGameBox.startButton.classList.remove("zoom");
+        newGameBox.playerOne.classList.remove("hide-up");
+        newGameBox.playerTwo.classList.remove("hide-down");
+
+    })
+    return { gridBox, drawGrid, resetGrid, hoverBoxes, drawName, addScore, highlightBox, nextRoundButton }
 })();
 
 let playerOne = Player("Carl", "×");
 let playerTwo = Player("Kindon", "⚬");
 
 displayContainer.drawGrid();
-gameData.changePlayer();

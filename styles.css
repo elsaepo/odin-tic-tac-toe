@@ -1,10 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Raleway:wght@100;200;300;400;500;600;700&family=Roboto+Mono:wght@200;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Carter+One&family=Poppins:wght@200;300;400;500;600&family=Roboto+Mono:wght@200;400;700&display=swap');
 
 :root {
     --grid-border: 4px solid rgb(187, 187, 187);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -30,6 +32,7 @@ p {
 }
 
 #grid-container {
+    position: relative;
     display: grid;
     width: min(400px, 80vw);
     height: min(400px, 80vw);
@@ -78,15 +81,152 @@ p {
     transition: font-size 0.2s ease;
 }
 
-#cell-0, #cell-1, #cell-2, #cell-3, #cell-4, #cell-5 {
+#cell-0,
+#cell-1,
+#cell-2,
+#cell-3,
+#cell-4,
+#cell-5 {
     border-bottom: var(--grid-border);
 }
 
-#cell-0, #cell-1, #cell-3, #cell-4, #cell-6, #cell-7 {
+#cell-0,
+#cell-1,
+#cell-3,
+#cell-4,
+#cell-6,
+#cell-7 {
     border-right: var(--grid-border);
 }
 
-/* Player name entries */
+
+/* New game display */
+
+#newgame-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5%;
+    height: 100%;
+    width: 100%;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.hidden {
+    display: none;
+}
+
+.new-player {
+    height: 30%;
+    width: 100%;
+    border-top: 4px solid black;
+    border-bottom: 4px solid black;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 3%;
+}
+
+.new-player p {
+    padding: 0 4px;
+    font-size: 1.1rem;
+}
+
+.new-player input {
+    padding: 2px 8px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    border-bottom: 2px solid black;
+    width: 55%;
+}
+
+.new-player-two,
+.new-player-two input {
+    text-align: right;
+}
+
+#start-game {
+    position: absolute;
+    width: 160px;
+    height: 60px;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    color: rgb(99, 38, 38);
+    background-color: rgb(235, 206, 206);
+    border: 4px solid black;
+    font-family: "Carter One", monospace;
+    line-height: 0;
+    padding-top: 8px;
+    transition: transform 0.1s ease, background-color 0.1s ease, color 0.1s ease
+}
+
+#start-game:hover {
+    background-color: rgb(82, 36, 36);
+    color: white;
+    transform: scale(1.1);
+    transition: transform 0.1s ease, background-color 0.1s ease, color 0.1s ease;
+}
+
+.hide-up {
+    animation: hide-up;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    animation-duration: 0.5s;
+}
+
+.hide-down {
+    animation: hide-down;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    animation-duration: 0.5s;
+}
+
+@keyframes hide-up {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateY(-250px);
+    }
+}
+
+@keyframes hide-down {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateY(250px);
+    }
+}
+
+.zoom {
+    animation: zoom;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    animation-duration: 0.5s;
+}
+
+@keyframes zoom {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(10);
+        display: none;
+    }
+}
+
+
+/* Player name boxes */
+
 #players-container {
     margin-top: 12px;
     height: 40px;
