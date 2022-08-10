@@ -135,6 +135,7 @@ p {
 }
 
 .new-player {
+    position: relative;
     height: 30%;
     width: 100%;
     border-top: 4px solid black;
@@ -148,7 +149,7 @@ p {
     font-size: 1.1rem;
 }
 
-.new-player input {
+.new-player input, .comp-text {
     padding: 2px 8px;
     font-size: 1.4rem;
     font-weight: 600;
@@ -161,6 +162,85 @@ p {
 .new-player-two,
 .new-player-two input {
     text-align: right;
+}
+
+.new-name {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.new-name-one {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.new-name select {
+    padding: 5px;
+    border: 2px solid black;
+    background-color: rgb(192, 213, 233);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.new-name option {
+    padding: 5px;
+    font-size: 0.8rem;
+    height: 20px;
+}
+
+
+
+.new-name option[value="human"],
+.new-name select[data-chosen="human"] {
+    background-color: rgb(192, 213, 233);
+}
+
+.new-name option[value="aiEasy"],
+.new-name select[data-chosen="aiEasy"]{
+    background-color: rgb(166, 224, 166);
+}
+
+.new-name option[value="aiHard"],
+.new-name select[data-chosen="aiHard"]{
+    background-color: rgb(204, 183, 143);
+}
+
+.new-name option[value="aiPro"],
+.new-name select[data-chosen="aiPro"]{
+    background-color: rgb(194, 102, 102);
+}
+
+.comp-text {
+    display: none;
+    border: none;
+    font-style: italic;
+    line-height: 0.9;
+}
+
+.ai-pro-text {
+    color:rgb(82, 36, 36);
+    font-weight: 900;
+    text-shadow: 0 0 8px red;
+}
+
+.new-name select[data-chosen="aiEasy"] ~ input,
+.new-name select[data-chosen="aiHard"] ~ input,
+.new-name select[data-chosen="aiPro"] ~ input {
+    display:none;
+}
+
+.new-name select[data-chosen="aiEasy"] ~ .ai-easy-text {
+    display:inline-block;
+}
+
+.new-name select[data-chosen="aiHard"] ~ .ai-hard-text {
+    display:inline-block;
+}
+
+.new-name select[data-chosen="aiPro"] ~ .ai-pro-text {
+    display:inline-block;
 }
 
 #start-game {

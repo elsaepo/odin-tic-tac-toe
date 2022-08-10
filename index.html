@@ -44,19 +44,40 @@
                     <div class="new-label">
                         <p>PLAYER X</p>
                     </div>
-                    <div class="new-name">
+                    <div class="new-name new-name-one">
+                        <select class="control-box control-box-one" name="controller-one" id="controller-one"
+                            onchange="this.dataset.chosen = this.value; ">
+                            <option value="human">HUMAN</option>
+                            <option value="aiEasy">AI - EASY</option>
+                            <option value="aiHard">AI - HARD</option>
+                            <option value="aiPro">AI - TACBOT 3000</option>
+                        </select>
                         <input type="text" name="player-one-name" id="player-one-name" maxlength="12"
                             placeholder="Enter your name" required>
+                        <div class="comp-text ai-easy-text">AI - EASY</div>
+                        <div class="comp-text ai-hard-text">AI - HARD</div>
+                        <div class="comp-text ai-pro-text">TACBOT 3000</div>
                     </div>
                 </div>
                 <div class="new-player new-player-two">
                     <div class="new-label">
                         <p>PLAYER O</p>
                     </div>
-                    <div class="new-name">
+                    <div class="new-name new-name-two">
+                        <select class="control-box control-box-two" name="controller-two" id="controller-two"
+                            onchange="this.dataset.chosen = this.value; ">
+                            <option value="human">HUMAN</option>
+                            <option value="aiEasy">AI - EASY</option>
+                            <option value="aiHard">AI - HARD</option>
+                            <option value="aiPro">AI - TACBOT 3000</option>
+                        </select>
                         <input type="text" name="player-two-name" id="player-two-name" maxlength="12"
                             placeholder="Enter your name" required>
+                            <div class="comp-text ai-easy-test">AI - EASY</div>
+                        <div class="comp-text ai-hard-text">AI - HARD</div>
+                        <div class="comp-text ai-pro-text">TACBOT 3000</div>
                     </div>
+
                 </div>
                 <button id="start-game">FIGHT!</button>
             </div>
