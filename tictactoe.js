@@ -61,13 +61,40 @@ const gameData = (() => {
             node.textContent = this.currentPlayer.marker;
             this.currentPlayer.marker === "⚬" ? node.classList.add("o-sizer") : node.classList.remove("o-sizer")
         })
+        if(this.currentPlayer.controller !== "human"){
+            this.currentPlayer.move(this.currentPlayer.getAICell("aiEasy"));
+        }
         return this.currentPlayer;
+        // send player move here or something
     };
     return { currentPlayer, changePlayer, moves };
 })();
 
 const Player = (name, marker, controller) => {
-    const move = function (cellID, node) {
+    const getAICell = function(difficulty){
+        let pseudoArray = [...gameBoard.gameArray];
+        // let pseudoArray = [
+        //    "⚬", "⚬", "",
+        //    "×", "×", "",
+        //    "", "", "×"
+        // ];
+        let possibleMoves = pseudoArray.reduce((acc, curr, index) => {
+            if(!curr){ acc.push(index); }
+            return acc;
+        }, []);
+        if(difficulty = "aiEasy"){
+            return possibleMoves[Math.floor(Math.random()*possibleMoves.length)];
+        }
+        if(difficulty = "aiHard"){
+            //return hard move
+
+        }
+        if(difficulty = "aiPro"){
+            //return pro move
+        }
+    }
+    const move = function (cellID) {
+        let node = document.querySelector(`#cell-${cellID}`)
         node.textContent = gameBoard.setMarkerAt(cellID, this.marker);
         // Makes "o" elements bigger due to available unicode characters
         if (this.marker === "⚬") { node.classList.add("o-sizer") };
@@ -85,14 +112,13 @@ const Player = (name, marker, controller) => {
             });
             displayContainer.addScore(this);
             displayContainer.nextRoundButton.classList.remove("inactive-button");
-            // WINNER DISPLAY
         } else if (gameData.moves === 9) {
             displayContainer.nextRoundButton.classList.remove("inactive-button");
             // DRAW DISPLAY
         } else gameData.changePlayer();
 
     }
-    return { name, marker, move }
+    return { name, marker, move, getAICell, controller }
 }
 
 const displayContainer = (() => {
@@ -112,7 +138,7 @@ const displayContainer = (() => {
                 event.preventDefault();
                 if (gameData.winner) { return };
                 if (gameBoard.getMarkerAt(i)[0]) { return };
-                gameData.currentPlayer.move(i, event.target);
+                gameData.currentPlayer.move(i);
             })
             gridBox.appendChild(gridCell);
         }
@@ -133,8 +159,12 @@ const displayContainer = (() => {
     newGameBox.startButton.addEventListener("mousedown", function (event) {
         let p1Name = document.querySelector("#player-one-name").value || "Anonymous";
         let p2Name = document.querySelector("#player-two-name").value || "Anonymous";
-        playerOne = Player(p1Name, "×", "human");
-        playerTwo = Player(p2Name, "⚬", "human");
+        let p1Controller = document.querySelector(".control-box-one").getAttribute("data-chosen");
+        let p2Controller = document.querySelector(".control-box-two").getAttribute("data-chosen");
+        p1Controller = p1Controller ? p1Controller : "human";
+        p2Controller = p2Controller ? p2Controller : "human";
+        playerOne = Player(p1Name, "×", p1Controller);
+        playerTwo = Player(p2Name, "⚬", p2Controller);
         drawName(playerOne);
         drawName(playerTwo);
         document.querySelector(".player-one-score").textContent = "0";
@@ -146,6 +176,10 @@ const displayContainer = (() => {
             newGameBox.newContainer.style.display = "none";
         }, 500)
         gameData.changePlayer(playerOne);
+        if(playerOne.controller !== "human"){
+            //playerOne.move(player.getAICell())
+            playerOne.move(playerOne.getAICell());
+        }
     })
     const getPlayerNum = (obj) => { return (obj === playerOne) ? "one" : "two"; }
     const drawName = function (player) {
