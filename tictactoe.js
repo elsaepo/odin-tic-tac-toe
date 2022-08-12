@@ -22,24 +22,24 @@ const gameBoard = (() => {
         gameArray[id] = marker;
         return marker;
     }
-    const checkWin = (cell, marker) => {
+    const checkWin = (board, cell, marker) => {
         let coord = indexToCoord(cell);
         let baseX = coordToIndex(0, coord.y);
         let baseY = coordToIndex(coord.x, 0);
         const checkHorizontal = (y) => {
-            if (gameArray[y] === gameArray[y + 1] && gameArray[y + 1] === gameArray[y + 2]) {
+            if (board[y] === board[y + 1] && board[y + 1] === board[y + 2]) {
                 return [y, y + 1, y + 2];
             };
         }
         const checkVertical = (x) => {
-            if (gameArray[x] === gameArray[x + 3] && gameArray[x + 3] === gameArray[x + 6]) {
+            if (board[x] === board[x + 3] && board[x + 3] === board[x + 6]) {
                 return [x, x + 3, x + 6];
             };
         }
         const checkDiagonal = (mark) => {
-            if (gameArray[0] === mark && gameArray[4] === mark && gameArray[8] === mark) {
+            if (board[0] === mark && board[4] === mark && board[8] === mark) {
                 return [0, 4, 8];
-            } else if (gameArray[2] === mark && gameArray[4] === mark && gameArray[6] === mark) {
+            } else if (board[2] === mark && board[4] === mark && board[6] === mark) {
                 return [2, 4, 6];
             }
         }
@@ -83,11 +83,15 @@ const Player = (name, marker, controller) => {
             return acc;
         }, []);
         if(difficulty = "aiEasy"){
+            console.log(`${possibleMoves}`)
             return possibleMoves[Math.floor(Math.random()*possibleMoves.length)];
         }
         if(difficulty = "aiHard"){
             //return hard move
-
+            for(let i = 0; i < possibleMoves.length; i++){
+                let checkArray = [...pseudoArray];
+                checkArray[possibleMoves[i]] = this.marker;
+            }
         }
         if(difficulty = "aiPro"){
             //return pro move
@@ -100,7 +104,7 @@ const Player = (name, marker, controller) => {
         if (this.marker === "⚬") { node.classList.add("o-sizer") };
         node.classList.remove("grid-hover");
         gameData.moves++;
-        let winReturn = gameBoard.checkWin(cellID, marker);
+        let winReturn = gameBoard.checkWin(gameBoard.gameArray, cellID, marker);
         // On Win logic
         if (winReturn) {
             gameData.winner = this;
@@ -176,10 +180,9 @@ const displayContainer = (() => {
             newGameBox.newContainer.style.display = "none";
         }, 500)
         gameData.changePlayer(playerOne);
-        if(playerOne.controller !== "human"){
-            //playerOne.move(player.getAICell())
-            playerOne.move(playerOne.getAICell());
-        }
+        // if(playerOne.controller !== "human"){
+        //     playerOne.move(playerOne.getAICell());
+        // }
     })
     const getPlayerNum = (obj) => { return (obj === playerOne) ? "one" : "two"; }
     const drawName = function (player) {
