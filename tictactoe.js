@@ -61,40 +61,58 @@ const gameData = (() => {
             node.textContent = this.currentPlayer.marker;
             this.currentPlayer.marker === "⚬" ? node.classList.add("o-sizer") : node.classList.remove("o-sizer")
         })
-        if(this.currentPlayer.controller !== "human"){
-            this.currentPlayer.move(this.currentPlayer.getAICell("aiEasy"));
+        if (this.currentPlayer.controller !== "human") {
+            setTimeout(this.currentPlayer.move(this.currentPlayer.getAICell(this.currentPlayer.controller)), 1000);
         }
         return this.currentPlayer;
-        // send player move here or something
     };
     return { currentPlayer, changePlayer, moves };
 })();
 
 const Player = (name, marker, controller) => {
-    const getAICell = function(difficulty){
+    const getAICell = function (difficulty) {
         let pseudoArray = [...gameBoard.gameArray];
         // let pseudoArray = [
-        //    "⚬", "⚬", "",
-        //    "×", "×", "",
-        //    "", "", "×"
+        //     "⚬", "⚬", "",
+        //     "×", "", "",
+        //     "", "", "×"
         // ];
+        // the above is a gret test because at first we have to stop our opponent winning with [2]
+        // then our opponent is forced to play [5]
+        // then we can force a win with a certain move after that with [6]!
         let possibleMoves = pseudoArray.reduce((acc, curr, index) => {
-            if(!curr){ acc.push(index); }
+            if (!curr) { acc.push(index); }
             return acc;
         }, []);
-        if(difficulty = "aiEasy"){
-            console.log(`${possibleMoves}`)
-            return possibleMoves[Math.floor(Math.random()*possibleMoves.length)];
+        console.log(`${possibleMoves}`)
+        if (difficulty === "aiEasy") {
+            // Easy - plays a random move
+            return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
         }
-        if(difficulty = "aiHard"){
-            //return hard move
-            for(let i = 0; i < possibleMoves.length; i++){
+        if (difficulty === "aiHard") {
+            // Hard - checks for a winning move, then for an opponent's next winning move, then random
+            for (let i = 0; i < possibleMoves.length; i++) {
                 let checkArray = [...pseudoArray];
                 checkArray[possibleMoves[i]] = this.marker;
-            }
+                let winReturn = gameBoard.checkWin([...checkArray], possibleMoves[i], marker);
+                if (winReturn) {
+                    return possibleMoves[i];
+                } else {
+                let dummyOppObject = this === playerOne ? playerTwo : playerOne;
+                let oppPossibleMoves = possibleMoves.filter(index => index !== possibleMoves[i])
+                for (let j = 0; j < oppPossibleMoves.length; j++) {
+                    let oppArray = [...checkArray];
+                    oppArray[oppPossibleMoves[j]] = dummyOppObject.marker;
+                    if (gameBoard.checkWin([...oppArray], oppPossibleMoves[j], dummyOppObject.marker)) {
+                        return oppPossibleMoves[j];
+                    }
+                };
+            }}
+            return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
         }
-        if(difficulty = "aiPro"){
-            //return pro move
+        if (difficulty = "aiPro") {
+            //Pro uses minimax to return a winning tree
+
         }
     }
     const move = function (cellID) {
@@ -180,9 +198,6 @@ const displayContainer = (() => {
             newGameBox.newContainer.style.display = "none";
         }, 500)
         gameData.changePlayer(playerOne);
-        // if(playerOne.controller !== "human"){
-        //     playerOne.move(playerOne.getAICell());
-        // }
     })
     const getPlayerNum = (obj) => { return (obj === playerOne) ? "one" : "two"; }
     const drawName = function (player) {
