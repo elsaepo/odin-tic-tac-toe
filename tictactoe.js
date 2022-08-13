@@ -23,6 +23,16 @@ const gameBoard = (() => {
         return marker;
     }
     const checkWin = (board, cell, marker) => {
+        if (!cell) {
+            return (board[0] && board[0] === board[1] && board[1] === board[2] ? board[0] : false ||
+                board[3] && board[3] === board[4] && board[4] === board[5] ? board[3] : false ||
+                    board[6] && board[6] === board[7] && board[7] === board[8] ? board[6] : false ||
+                        board[0] && board[0] === board[3] && board[3] === board[6] ? board[0] : false ||
+                            board[1] && board[1] === board[4] && board[4] === board[7] ? board[1] : false ||
+                                board[2] && board[2] === board[5] && board[5] === board[8] ? board[2] : false ||
+                                    board[0] && board[0] === board[4] && board[4] === board[8] ? board[0] : false ||
+                                        board[2] && board[2] === board[4] && board[4] === board[6] ? board[2] : false)
+        }
         let coord = indexToCoord(cell);
         let baseX = coordToIndex(0, coord.y);
         let baseY = coordToIndex(coord.x, 0);
@@ -60,10 +70,20 @@ const gameData = (() => {
         displayContainer.hoverBoxes.forEach(node => {
             node.textContent = this.currentPlayer.marker;
             this.currentPlayer.marker === "⚬" ? node.classList.add("o-sizer") : node.classList.remove("o-sizer")
-        })
-        if (this.currentPlayer.controller !== "human") {
-            setTimeout(this.currentPlayer.move(this.currentPlayer.getAICell(this.currentPlayer.controller)), 1000);
+        });
+        // This adds an artificial delay to the AI's moves
+        function resolveAfterTimeout() {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve("resolved");
+                }, 150)
+            })
+        };
+        async function asyncCall() {
+            await resolveAfterTimeout();
+            gameData.currentPlayer.move(gameData.currentPlayer.getAICell(gameData.currentPlayer.controller));
         }
+        if (this.currentPlayer.controller !== "human") { asyncCall(); };
         return this.currentPlayer;
     };
     return { currentPlayer, changePlayer, moves };
@@ -74,8 +94,8 @@ const Player = (name, marker, controller) => {
         let pseudoArray = [...gameBoard.gameArray];
         // let pseudoArray = [
         //     "⚬", "⚬", "",
-        //     "×", "", "",
-        //     "", "", "×"
+        //     "×", "×", "",
+        //     "⚬", "×", ""
         // ];
         // the above is a gret test because at first we have to stop our opponent winning with [2]
         // then our opponent is forced to play [5]
@@ -84,6 +104,7 @@ const Player = (name, marker, controller) => {
             if (!curr) { acc.push(index); }
             return acc;
         }, []);
+        let dummyOppObject = this === playerOne ? playerTwo : playerOne;
         console.log(`${possibleMoves}`)
         if (difficulty === "aiEasy") {
             // Easy - plays a random move
@@ -98,21 +119,113 @@ const Player = (name, marker, controller) => {
                 if (winReturn) {
                     return possibleMoves[i];
                 } else {
-                let dummyOppObject = this === playerOne ? playerTwo : playerOne;
-                let oppPossibleMoves = possibleMoves.filter(index => index !== possibleMoves[i])
-                for (let j = 0; j < oppPossibleMoves.length; j++) {
-                    let oppArray = [...checkArray];
-                    oppArray[oppPossibleMoves[j]] = dummyOppObject.marker;
-                    if (gameBoard.checkWin([...oppArray], oppPossibleMoves[j], dummyOppObject.marker)) {
-                        return oppPossibleMoves[j];
-                    }
-                };
-            }}
+                    let oppPossibleMoves = possibleMoves.filter(index => index !== possibleMoves[i])
+                    for (let j = 0; j < oppPossibleMoves.length; j++) {
+                        let oppArray = [...checkArray];
+                        oppArray[oppPossibleMoves[j]] = dummyOppObject.marker;
+                        if (gameBoard.checkWin([...oppArray], oppPossibleMoves[j], dummyOppObject.marker)) {
+                            return oppPossibleMoves[j];
+                        }
+                    };
+                }
+            }
             return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
         }
         if (difficulty = "aiPro") {
             //Pro uses minimax to return a winning tree
+            //evaluation funtion - returns +10, -10 or zero depending on board state
 
+            const evaluate = (board) => {
+
+                //console.log(`evaluating ${this.marker} on board ${board} \n ${gameBoard.checkWin(board)}`)
+                if (!gameBoard.checkWin(board)) {
+                    return 0;
+                } else if (gameBoard.checkWin(board) === this.marker) {
+                    return 10;
+                } else return -10;
+            };
+
+            // findBestMove returns a move for a given game board
+            const findBestMove = (board) => {
+                console.log(board);
+                let bestMoveValue = -1000;
+                let bestMoveIndex;
+
+                for (let i = 0; i < possibleMoves.length; i++) {
+                    console.log(`-----checking move ${possibleMoves[i]}`)
+                    //evaluate the current move
+                    board[possibleMoves[i]] = this.marker;
+                    let thisMoveValue = minimax(board, 0, false);
+                    console.log(`-----evaluation: ${thisMoveValue}`)
+                    //console.log(`thisMoveValue: ${thisMoveValue}`);
+                    //console.log(`bestMoveValue: ${bestMoveValue}`);
+                    board[possibleMoves[i]] = "";
+                    if (thisMoveValue > bestMoveValue) {
+                        console.log("new move is better")
+                        bestMoveValue = thisMoveValue;
+                        bestMoveIndex = possibleMoves[i];
+                    }
+                }
+                console.log(`best move: ${bestMoveIndex}`);
+                console.log(`best move value: ${bestMoveValue}`);
+                return bestMoveIndex;
+            }
+
+            const checkMovesLeft = function (board) {
+                for (let i = 0; i < board.length; i++){
+                    if (board[i] === ""){
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            //minimax returns a value for the given move
+            const minimax = (board, depth, isMaximizingPlayer) => {
+                let score = evaluate(board)
+                // console.log(board)
+                // console.log(`score: ${score}`);
+                //console.log(`depth: ${depth}`)
+                // if current board is in a terminal state (win, lose or draw):
+                // return value of the board
+                if (score === 10 || score === -10) { return score; };
+                if (!checkMovesLeft(board)) { return 0; };
+                // if ixMaximizingPlayer (finding highest value)
+                if (isMaximizingPlayer) {
+                    // console.log(`checking max`)
+                    let bestValue = -100;
+                    // for each move in board:
+                    for (let i = 0; i < 9; i++) {
+                        //console.log(`max checking board ${board}`)
+                        if (!board[i]) {
+                            board[i] = this.marker;
+                            //console.log(`max new board: ${board}`)
+                            let thisValue = minimax(board, depth + 1, !isMaximizingPlayer);
+                            //console.log(thisValue)
+                            bestValue = Math.max(bestValue, thisValue);
+                            board[i] = "";
+                        }
+                    }
+                    return bestValue;
+                    // if the minimiziers move (finding lowest value)
+                } else {
+                    // console.log(`checking min`)
+                    let bestValue = 100;
+                    for (let i = 0; i < 9; i++) {
+                        //console.log(`min checking board ${board}`)
+                        if (!board[i]) {
+                            board[i] = dummyOppObject.marker;
+                            // console.log(`min new board: ${board}`)
+                            let thisValue = minimax(board, depth + 1, !isMaximizingPlayer);
+                            bestValue = Math.min(bestValue, thisValue);
+                            board[i] = "";
+                        }
+                    }
+                    return bestValue;
+                }
+
+            }
+            return findBestMove([...pseudoArray])
         }
     }
     const move = function (cellID) {
@@ -140,6 +253,7 @@ const Player = (name, marker, controller) => {
         } else gameData.changePlayer();
 
     }
+
     return { name, marker, move, getAICell, controller }
 }
 
@@ -185,6 +299,20 @@ const displayContainer = (() => {
         let p2Controller = document.querySelector(".control-box-two").getAttribute("data-chosen");
         p1Controller = p1Controller ? p1Controller : "human";
         p2Controller = p2Controller ? p2Controller : "human";
+        const getControllerName = function (controller) {
+            switch (controller) {
+                case "aiEasy":
+                    return "AI - EASY";
+                case "aiHard":
+                    return "AI - HARD";
+                case "aiPro":
+                    return "AI - PRO";
+                default:
+                    return;
+            }
+        }
+        if (p1Controller !== "human") { p1Name = getControllerName(p1Controller); };
+        if (p2Controller !== "human") { p2Name = getControllerName(p2Controller); };
         playerOne = Player(p1Name, "×", p1Controller);
         playerTwo = Player(p2Name, "⚬", p2Controller);
         drawName(playerOne);
