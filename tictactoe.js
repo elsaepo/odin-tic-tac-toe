@@ -92,20 +92,11 @@ const gameData = (() => {
 const Player = (name, marker, controller) => {
     const getAICell = function (difficulty) {
         let pseudoArray = [...gameBoard.gameArray];
-        // let pseudoArray = [
-        //     "⚬", "⚬", "",
-        //     "×", "×", "",
-        //     "⚬", "×", ""
-        // ];
-        // the above is a gret test because at first we have to stop our opponent winning with [2]
-        // then our opponent is forced to play [5]
-        // then we can force a win with a certain move after that with [6]!
         let possibleMoves = pseudoArray.reduce((acc, curr, index) => {
             if (!curr) { acc.push(index); }
             return acc;
         }, []);
         let dummyOppObject = this === playerOne ? playerTwo : playerOne;
-        console.log(`${possibleMoves}`)
         if (difficulty === "aiEasy") {
             // Easy - plays a random move
             return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
@@ -134,10 +125,10 @@ const Player = (name, marker, controller) => {
         if (difficulty = "aiPro") {
             //Pro uses minimax to return a winning tree
             //evaluation funtion - returns +10, -10 or zero depending on board state
+            let winConditions = 0;
+            let loseConditions = 0;
 
             const evaluate = (board) => {
-
-                //console.log(`evaluating ${this.marker} on board ${board} \n ${gameBoard.checkWin(board)}`)
                 if (!gameBoard.checkWin(board)) {
                     return 0;
                 } else if (gameBoard.checkWin(board) === this.marker) {
@@ -145,26 +136,30 @@ const Player = (name, marker, controller) => {
                 } else return -10;
             };
 
-            // findBestMove returns a move for a given game board
+            // findBestMove() returns the best move for a given game board
             const findBestMove = (board) => {
-                console.log(board);
+                // For cases where there are multiple moves with the same value (very often with draws)
+                // We then calculate the win/loss differential as a 0-1 ratio, and add it to the value
                 let bestMoveValue = -1000;
                 let bestMoveIndex;
-
                 for (let i = 0; i < possibleMoves.length; i++) {
-                    console.log(`-----checking move ${possibleMoves[i]}`)
-                    //evaluate the current move
+                    //console.log(`-----checking move ${possibleMoves[i]}`)
+                    // Starts the minimax() function - starts once per possible move
                     board[possibleMoves[i]] = this.marker;
                     let thisMoveValue = minimax(board, 0, false);
-                    console.log(`-----evaluation: ${thisMoveValue}`)
-                    //console.log(`thisMoveValue: ${thisMoveValue}`);
-                    //console.log(`bestMoveValue: ${bestMoveValue}`);
+                    let thisWinDifferential = winConditions/(winConditions + loseConditions);
+                    thisMoveValue += thisWinDifferential;
+                    //console.log(`differential: ${thisWinDifferential}`)
+                    //console.log(`-----evaluation: ${thisMoveValue}`)
+                    winConditions = 0;
+                    loseConditions = 0;
                     board[possibleMoves[i]] = "";
+                    // If a better move is found, update the values for the current best move
                     if (thisMoveValue > bestMoveValue) {
-                        console.log("new move is better")
                         bestMoveValue = thisMoveValue;
                         bestMoveIndex = possibleMoves[i];
-                    }
+                        bestWinDifferential = thisWinDifferential;
+                    } 
                 }
                 console.log(`best move: ${bestMoveIndex}`);
                 console.log(`best move value: ${bestMoveValue}`);
@@ -180,42 +175,37 @@ const Player = (name, marker, controller) => {
                 return false;
             }
 
-            //minimax returns a value for the given move
+            // minimax() returns a value for the given move - based on win condition and depth (-10 to +10)
             const minimax = (board, depth, isMaximizingPlayer) => {
                 let score = evaluate(board)
-                // console.log(board)
-                // console.log(`score: ${score}`);
-                //console.log(`depth: ${depth}`)
-                // if current board is in a terminal state (win, lose or draw):
-                // return value of the board
-                if (score === 10 || score === -10) { return score; };
+                // If current board is in a terminal state (win, lose or draw), return current score
+                if (score === 10) { 
+                    winConditions++;
+                    return score - depth };
+                if (score === -10) { 
+                    loseConditions++;
+                    return score + depth };
                 if (!checkMovesLeft(board)) { return 0; };
-                // if ixMaximizingPlayer (finding highest value)
+                // ifMaximizingPlayer === true (finding highest value)
                 if (isMaximizingPlayer) {
-                    // console.log(`checking max`)
                     let bestValue = -100;
-                    // for each move in board:
+                    // For each possible move in the board
                     for (let i = 0; i < 9; i++) {
-                        //console.log(`max checking board ${board}`)
                         if (!board[i]) {
+                            // Sets up new board to check, then reverts it back afterwards
                             board[i] = this.marker;
-                            //console.log(`max new board: ${board}`)
                             let thisValue = minimax(board, depth + 1, !isMaximizingPlayer);
-                            //console.log(thisValue)
                             bestValue = Math.max(bestValue, thisValue);
                             board[i] = "";
                         }
                     }
                     return bestValue;
-                    // if the minimiziers move (finding lowest value)
+                    // ifMaximizingPlayer === false (finding lowest move)
                 } else {
-                    // console.log(`checking min`)
                     let bestValue = 100;
                     for (let i = 0; i < 9; i++) {
-                        //console.log(`min checking board ${board}`)
                         if (!board[i]) {
                             board[i] = dummyOppObject.marker;
-                            // console.log(`min new board: ${board}`)
                             let thisValue = minimax(board, depth + 1, !isMaximizingPlayer);
                             bestValue = Math.min(bestValue, thisValue);
                             board[i] = "";
