@@ -143,14 +143,15 @@ const Player = (name, marker, controller) => {
                 let bestMoveValue = -1000;
                 let bestMoveIndex;
                 for (let i = 0; i < possibleMoves.length; i++) {
-                    //console.log(`-----checking move ${possibleMoves[i]}`)
+                    console.log(`-----checking move ${possibleMoves[i]}`)
                     // Starts the minimax() function - starts once per possible move
                     board[possibleMoves[i]] = this.marker;
                     let thisMoveValue = minimax(board, 0, false);
-                    let thisWinDifferential = winConditions/(winConditions + loseConditions);
+                    let thisWinDifferential = 0;
+                    if (winConditions){ thisWinDifferential = winConditions/(winConditions + loseConditions)};
                     thisMoveValue += thisWinDifferential;
-                    //console.log(`differential: ${thisWinDifferential}`)
-                    //console.log(`-----evaluation: ${thisMoveValue}`)
+                    console.log(`differential: ${thisWinDifferential}`)
+                    console.log(`-----evaluation: ${thisMoveValue}`)
                     winConditions = 0;
                     loseConditions = 0;
                     board[possibleMoves[i]] = "";
