@@ -23,7 +23,7 @@ const gameBoard = (() => {
         return marker;
     }
     const checkWin = (board, cell, marker) => {
-        if (!cell) {
+        if (cell === undefined) {
             return (board[0] && board[0] === board[1] && board[1] === board[2] ? board[0] : false ||
                 board[3] && board[3] === board[4] && board[4] === board[5] ? board[3] : false ||
                     board[6] && board[6] === board[7] && board[7] === board[8] ? board[6] : false ||
