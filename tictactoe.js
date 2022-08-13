@@ -297,7 +297,7 @@ const displayContainer = (() => {
                 case "aiHard":
                     return "AI - HARD";
                 case "aiPro":
-                    return "AI - PRO";
+                    return "TACBOT 3000";
                 default:
                     return;
             }
