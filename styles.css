@@ -38,7 +38,6 @@ p {
     height: min(400px, 80vw);
     grid-template: repeat(3, 1fr) / repeat(3, 1fr);
     margin: 24px auto;
-    /* filter: blur(5px); */
 }
 
 .grid-cell {
@@ -413,4 +412,38 @@ button:active {
     pointer-events: none;
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+@media only screen and (max-width: 500px) {
+    #newgame-container {
+        gap: 10%;
+    }
+
+    .new-player {
+        height: 35%;
+        padding: 5% 3% 10%;
+    }
+    
+    .new-player p {
+        font-size: 1rem;
+    }
+    
+    .new-player input, .comp-text {
+        font-size: 1.1rem;
+    }
+    
+    .new-name select {
+        padding: 4px;
+    }
+    
+    .new-name option {
+        padding: 4px;
+        height: 15px;
+    }
+
+    #start-game {
+        width: 130px;
+        height: 50px;
+        font-size: 1.6rem;
+    }
 }
